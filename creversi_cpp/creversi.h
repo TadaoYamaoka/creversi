@@ -36,14 +36,16 @@ public:
 		return is_black_turn ? utils::to_s<true>(bd) : utils::to_s<false>(bd);
 	}
 
-	__Board move(const int move) {
+	void move(const int move) {
 		bd = state::move(bd, move);
 		is_black_turn = !is_black_turn;
 	}
 
-	void move_from_str(const std::string& str) {
-		bd = state::move(bd, to_hand(str));
+	int move_from_str(const std::string& str) {
+		int move = to_hand(str);
+		bd = state::move(bd, move);
 		is_black_turn = !is_black_turn;
+		return move;
 	}
 
 	void move_pass() {
@@ -116,10 +118,11 @@ public:
 		bits = _blsr_u64(bits);
 		return sq;
 	}
-	int size() const { return _popcnt64(bits); }
+	int size() const { return (int)_popcnt64(bits); }
 
 private:
 	uint64_t bits;
 };
 
 std::string __move_to_str(const int move) { return to_s(move); }
+int __move_from_str(const std::string str) { return to_hand(str); }

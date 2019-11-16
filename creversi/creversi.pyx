@@ -1,11 +1,38 @@
-from libcpp.string cimport string
+﻿from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp cimport bool
 
 import numpy as np
 cimport numpy as np
 
+SQUARES = [
+	A1, B1, C1, D1, E1, F1, G1, H1,
+	A2, B2, C2, D2, E2, F2, G2, H2,
+	A3, B3, C3, D3, E3, F3, G3, H3,
+	A4, B4, C4, D4, E4, F4, G4, H4,
+	A5, B5, C5, D5, E5, F5, G5, H5,
+	A6, B6, C6, D6, E6, F6, G6, H6,
+	A7, B7, C7, D7, E7, F7, G7, H7,
+	A8, B8, C8, D8, E8, F8, G8, H8,
+] = range(64)
+
+COLORS = [BLACK, WHITE] = [True, False]
 PIECES = [NONE, BLACK, WHITE] = range(3)
+
+SVG_PIECE_DEFS = [
+	'<g id="black"><circle cx="10" cy="10" r="8.5" fill="black"/></g>',
+	'<g id="white"><circle cx="10" cy="10" r="8.5" fill="white"/></g>',
+]
+SVG_PIECE_DEF_IDS = [None,
+	"black", "white",
+]
+SVG_BOARD = '<rect fill="green" height="161" width="161" x="10" y="10" />'
+SVG_SQUARES = '<g stroke="black"><rect width="161" height="161" stroke-width="1.5" fill="none" x="10" y="10" /><line stroke-width="1.0" x1="10.5" x2="170.5" y1="30.5" y2="30.5" /><line stroke-width="1.0" x1="10.5" x2="170.5" y1="50.5" y2="50.5" /><line stroke-width="1.0" x1="10.5" x2="170.5" y1="70.5" y2="70.5" /><line stroke-width="1.0" x1="10.5" x2="170.5" y1="90.5" y2="90.5" /><line stroke-width="1.0" x1="10.5" x2="170.5" y1="110.5" y2="110.5" /><line stroke-width="1.0" x1="10.5" x2="170.5" y1="130.5" y2="130.5" /><line stroke-width="1.0" x1="10.5" x2="170.5" y1="150.5" y2="150.5" /><line stroke-width="1.0" x1="30.5" x2="30.5" y1="10.5" y2="170.5" /><line stroke-width="1.0" x1="50.5" x2="50.5" y1="10.5" y2="170.5" /><line stroke-width="1.0" x1="70.5" x2="70.5" y1="10.5" y2="170.5" /><line stroke-width="1.0" x1="90.5" x2="90.5" y1="10.5" y2="170.5" /><line stroke-width="1.0" x1="110.5" x2="110.5" y1="10.5" y2="170.5" /><line stroke-width="1.0" x1="130.5" x2="130.5" y1="10.5" y2="170.5" /><line stroke-width="1.0" x1="150.5" x2="150.5" y1="10.5" y2="170.5" /></g>'
+SVG_COORDINATES = '<g><text font-family="serif" font-size="9.5" text-anchor="middle" x="20.5" y="8">a</text><text font-family="serif" font-size="9.5" text-anchor="middle" x="40.5" y="8">b</text><text font-family="serif" font-size="9.5" text-anchor="middle" x="60.5" y="8">c</text><text font-family="serif" font-size="9.5" text-anchor="middle" x="80.5" y="8">d</text><text font-family="serif" font-size="9.5" text-anchor="middle" x="100.5" y="8">e</text><text font-family="serif" font-size="9.5" text-anchor="middle" x="120.5" y="8">f</text><text font-family="serif" font-size="9.5" text-anchor="middle" x="140.5" y="8">g</text><text font-family="serif" font-size="9.5" text-anchor="middle" x="160.5" y="8">h</text><text font-family="serif" font-size="9.5" x="2.5" y="23.5">1</text><text font-family="serif" font-size="9.5" x="2.5" y="43.5">2</text><text font-family="serif" font-size="9.5" x="2.5" y="63.5">3</text><text font-family="serif" font-size="9.5" x="2.5" y="83.5">4</text><text font-family="serif" font-size="9.5" x="2.5" y="103.5">5</text><text font-family="serif" font-size="9.5" x="2.5" y="123.5">6</text><text font-family="serif" font-size="9.5" x="2.5" y="143.5">7</text><text font-family="serif" font-size="9.5" x="2.5" y="163.5">8</text></g>'
+
+class SvgWrapper(str):
+	def _repr_svg_(self):
+		return self
 
 cdef extern from "utils.hpp" namespace "utils":
 	void init_all()
@@ -21,7 +48,7 @@ cdef extern from "creversi.h":
 		void reset()
 		string dump()
 		void move(const int move)
-		void move_from_str(const string& str)
+		int move_from_str(const string& str)
 		void move_pass()
 		bool is_game_over()
 		int stone_sum()
@@ -64,7 +91,7 @@ cdef class Board:
 
 	def move_from_str(self, str str):
 		cdef string str_b = str.encode('ascii')
-		self.__board.move_from_str(str_b)
+		return self.__board.move_from_str(str_b)
 
 	def move_pass(self):
 		self.__board.move_pass()
@@ -98,6 +125,58 @@ cdef class Board:
 	def piece_planes(self, np.ndarray features):
 		return self.__board.piece_planes(features.data)
 
+	def to_svg(self, lastmove=None, float scale=1.0):
+		import xml.etree.ElementTree as ET
+
+		svg = ET.Element("svg", {
+			"xmlns": "http://www.w3.org/2000/svg",
+			"version": "1.1",
+			"xmlns:xlink": "http://www.w3.org/1999/xlink",
+			"width": str(172 * scale),
+			"height": str(172 * scale),
+			"viewBox": "0 0 172 172",
+		})
+
+		defs = ET.SubElement(svg, "defs")
+		for piece_def in SVG_PIECE_DEFS:
+			defs.append(ET.fromstring(piece_def))
+
+		svg.append(ET.fromstring(SVG_BOARD))
+
+		cdef int i, j
+		if lastmove is not None:
+			i, j = divmod(lastmove, 8)
+			ET.SubElement(svg, "rect", {
+				"x": str(10.5 + i * 20),
+				"y": str(10.5 + j * 20),
+				"width": str(20),
+				"height": str(20),
+				"fill": "#8bbf83"
+			})
+
+		svg.append(ET.fromstring(SVG_SQUARES))
+		svg.append(ET.fromstring(SVG_COORDINATES))
+
+		cdef int sq
+		cdef double x, y
+		for sq in SQUARES:
+			pc = self.__board.piece(sq)
+			if pc != NONE:
+				i, j = divmod(sq, 8)
+				x = 10.5 + i * 20
+				y = 10.5 + j * 20
+
+				ET.SubElement(svg, "use", {
+					"xlink:href": "#{}".format(SVG_PIECE_DEF_IDS[pc]),
+					"x": str(x),
+					"y": str(y),
+				})
+
+		return SvgWrapper(ET.tostring(svg).decode("utf-8"))
+	
+	def _repr_svg_(self):
+		return self.to_svg()
+
 cdef extern from "creversi.h":
 	cdef cppclass __LegalMoveList:
 		__LegalMoveList() except +
@@ -107,6 +186,7 @@ cdef extern from "creversi.h":
 		int size()
 
 	string __move_to_str(const int move)
+	int __move_from_str(const string str)
 
 cdef class LegalMoveList:
 	cdef __LegalMoveList __ml
@@ -127,3 +207,7 @@ cdef class LegalMoveList:
 
 def move_to_str(int move):
 	return __move_to_str(move).decode('ascii')
+
+def move_from_str(str str):
+	cdef string str_b = str.encode('ascii')
+	return __move_from_str(str_b)
