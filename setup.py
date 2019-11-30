@@ -19,12 +19,18 @@ ext_modules = [
          'creversi_cpp/bit_manipulations.cpp', 'creversi_cpp/hand.cpp', 'creversi_cpp/movable_generator.cpp', 'creversi_cpp/move_generator.cpp', 'creversi_cpp/state.cpp', 'creversi_cpp/utils.cpp', 'creversi_cpp/value.cpp'],
         language='c++',
         include_dirs = ['creversi_cpp', numpy.get_include()]),
+    Extension('creversi.gym_reversi.envs.reversi_env',
+        ['creversi/gym_reversi/envs/reversi_env.pyx'],
+        language='c++'),
+    Extension('creversi.gym_reversi.envs.reversi_vec_env',
+        ['creversi/gym_reversi/envs/reversi_vec_env.pyx'],
+        language='c++'),
 ]
 
 setup(
     name='creversi',
     version='0.0.0',
-    packages=['creversi'],
+    packages=['creversi', 'creversi.gym_reversi', 'creversi.gym_reversi.envs'],
     ext_modules=ext_modules,
     cmdclass={'build_ext': my_build_ext}
 )

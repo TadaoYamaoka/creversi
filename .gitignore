@@ -263,4 +263,4 @@ __pycache__/
 *.so
 /build
 *.egg-info/
-/creversi/creversi.cpp
+/creversi/**/*.cpp

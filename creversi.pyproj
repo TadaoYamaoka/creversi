@@ -22,6 +22,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="creversi\creversi.pyx" />
+    <Compile Include="creversi\GGF.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="creversi\gym_reversi\envs\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="creversi\gym_reversi\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="creversi\__init__.py">
       <SubType>Code</SubType>
     </Compile>
@@ -31,6 +40,16 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="creversi\" />
+    <Folder Include="creversi\gym_reversi\" />
+    <Folder Include="creversi\gym_reversi\envs\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="creversi\gym_reversi\envs\reversi_env.pyx">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="creversi\gym_reversi\envs\reversi_vec_env.pyx">
+      <SubType>Code</SubType>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
