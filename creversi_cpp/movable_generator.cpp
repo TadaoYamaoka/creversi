@@ -113,12 +113,12 @@ namespace state {
 	}
 
 	int mobility_count(const board &bd) {
-		return _popcnt64(mobility_pos(bd));
+		return (int)_popcnt64(mobility_pos(bd));
 	}
 
 	std::array<int, 2> mobility_count(const double_board &dbd) {
 		auto pos = mobility_pos(dbd);
-		const std::array<int, 2> res = { _popcnt64(_mm_cvtsi128_si64(pos)), _popcnt64(_mm_extract_epi64(pos, 1)) };
+		const std::array<int, 2> res = { (int)_popcnt64(_mm_cvtsi128_si64(pos)), (int)_popcnt64(_mm_extract_epi64(pos, 1)) };
 		//assert(res[0] == mobility_count(dbd.board1()) && res[1] == mobility_count(dbd.board2()));
 		return res;
 	}

@@ -142,6 +142,7 @@
     <ClInclude Include="bit_manipulations.hpp" />
     <ClInclude Include="board.hpp" />
     <ClInclude Include="creversi.h" />
+    <ClInclude Include="ggf_parser.h" />
     <ClInclude Include="hand.hpp" />
     <ClInclude Include="state.hpp" />
     <ClInclude Include="utils.hpp" />

@@ -57,8 +57,8 @@ struct half_board {
 	constexpr half_board(const uint64_t data) : data(data) {}
 	half_board &operator=(const half_board &) = default;
 	half_board &operator=(half_board &&) = default;
-	operator uint64_t() { return data; }
-	operator uint64_t() const { return data; }
+	operator uint64_t&() { return data; }
+	operator const uint64_t&() const { return data; }
 	bool get(const size_t index) const { return _bittest64((const long long*)&data, index); }
 	bool set(const size_t index) { return _bittestandset64((long long*)&data, index); }
 	bool reset(const size_t index) { return _bittestandreset64((long long*)&data, index); }

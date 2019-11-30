@@ -5,6 +5,21 @@ from libcpp cimport bool
 import numpy as np
 cimport numpy as np
 
+import locale
+
+dtypeBitboard = np.dtype((np.uint8, 16))
+dtypeTurn = np.dtype(np.bool)
+dtypeMove = np.dtype(np.int8)
+dtypeReward = np.dtype(np.int8)
+
+TrainingData = np.dtype([
+    ('bitboard', dtypeBitboard),
+	('turn', dtypeTurn),
+    ('move', dtypeMove),
+    ('reward', dtypeReward),
+    ])
+
+
 SQUARES = [
 	A1, B1, C1, D1, E1, F1, G1, H1,
 	A2, B2, C2, D2, E2, F2, G2, H2,
@@ -16,8 +31,11 @@ SQUARES = [
 	A8, B8, C8, D8, E8, F8, G8, H8,
 ] = range(64)
 
-COLORS = [BLACK, WHITE] = [True, False]
-PIECES = [NONE, BLACK, WHITE] = range(3)
+[BLACK_TURN, WHITE_TURN] = [True, False]
+PIECES = [EMPTY, BLACK, WHITE] = range(3)
+
+PASS = -1
+RESULT_FLAGS = [NONE, RESIGNED, TIME_OUT, MUTUAL_SCORE] = range(4)
 
 SVG_PIECE_DEFS = [
 	'<g id="black"><circle cx="10" cy="10" r="8.5" fill="black"/></g>',
@@ -45,19 +63,29 @@ cdef extern from "creversi.h":
 		__Board(const string &line, const bool is_black_turn) except +
 		__Board(const __Board& board, const bool is_black_turn) except +
 		void set(const string &line, const bool is_black_turn)
+		void set_bitboard(const char* bitboard, const bool is_black_turn)
+		void to_bitboard(char* bitboard)
 		void reset()
 		string dump()
 		void move(const int move)
 		int move_from_str(const string& str)
 		void move_pass()
+		bool is_legal(const int move)
 		bool is_game_over()
-		int stone_sum()
+		int piece_num()
+		int opponent_piece_num()
+		int piece_sum()
+		int puttable_num()
+		int opponent_puttable_num()
 		int diff_num()
 		int puttable_diff()
 		bool turn()
 		string to_s_ffo()
 		int piece(const int sq)
 		void piece_planes(char* mem)
+		void piece_planes_rotate90(char* mem)
+		void piece_planes_rotate180(char* mem)
+		void piece_planes_rotate270(char* mem)
 
 cdef class Board:
 	cdef __Board __board
@@ -76,9 +104,15 @@ cdef class Board:
 	def copy(self):
 		return Board(board=self)
 
-	def set_line(self, str line, bool is_black_turn=True):
+	def set_line(self, str line, bool is_black_turn):
 		cdef string line_b = line.encode('ascii')
 		self.__board.set(line_b, is_black_turn)
+
+	def set_bitboard(self, np.ndarray bitboard, bool is_black_turn):
+		self.__board.set_bitboard(bitboard.data, is_black_turn)
+
+	def to_bitboard(self, np.ndarray bitboard):
+		self.__board.to_bitboard(bitboard.data)
 
 	def reset(self):
 		self.__board.reset()
@@ -96,6 +130,9 @@ cdef class Board:
 	def move_pass(self):
 		self.__board.move_pass()
 
+	def is_legal(self, int move):
+		return self.__board.is_legal(move)
+
 	@property
 	def legal_moves(self):
 		return LegalMoveList(self)
@@ -103,8 +140,20 @@ cdef class Board:
 	def is_game_over(self):
 		return self.__board.is_game_over()
 
-	def stone_sum(self):
-		return self.__board.stone_sum()
+	def piece_num(self):
+		return self.__board.piece_num()
+
+	def opponent_piece_num(self):
+		return self.__board.opponent_piece_num()
+
+	def piece_sum(self):
+		return self.__board.piece_sum()
+
+	def puttable_num(self):
+		return self.__board.puttable_num()
+
+	def opponent_puttable_num(self):
+		return self.__board.opponent_puttable_num()
 
 	def diff_num(self):
 		return self.__board.diff_num()
@@ -124,6 +173,15 @@ cdef class Board:
 
 	def piece_planes(self, np.ndarray features):
 		return self.__board.piece_planes(features.data)
+
+	def piece_planes_rotate90(self, np.ndarray features):
+		return self.__board.piece_planes_rotate90(features.data)
+
+	def piece_planes_rotate180(self, np.ndarray features):
+		return self.__board.piece_planes_rotate180(features.data)
+
+	def piece_planes_rotate270(self, np.ndarray features):
+		return self.__board.piece_planes_rotate270(features.data)
 
 	def to_svg(self, lastmove=None, float scale=1.0):
 		import xml.etree.ElementTree as ET
@@ -147,8 +205,8 @@ cdef class Board:
 		if lastmove is not None:
 			i, j = divmod(lastmove, 8)
 			ET.SubElement(svg, "rect", {
-				"x": str(10.5 + i * 20),
-				"y": str(10.5 + j * 20),
+				"x": str(10.5 + j * 20),
+				"y": str(10.5 + i * 20),
 				"width": str(20),
 				"height": str(20),
 				"fill": "#8bbf83"
@@ -163,8 +221,8 @@ cdef class Board:
 			pc = self.__board.piece(sq)
 			if pc != NONE:
 				i, j = divmod(sq, 8)
-				x = 10.5 + i * 20
-				y = 10.5 + j * 20
+				x = 10.5 + j * 20
+				y = 10.5 + i * 20
 
 				ET.SubElement(svg, "use", {
 					"xlink:href": "#{}".format(SVG_PIECE_DEF_IDS[pc]),
@@ -186,7 +244,11 @@ cdef extern from "creversi.h":
 		int size()
 
 	string __move_to_str(const int move)
-	int __move_from_str(const string str)
+	string __move_to_STR(const int move)
+	int __move_from_str(const string& str)
+	int __move_rotate90(const int move)
+	int __move_rotate180(const int move)
+	int __move_rotate270(const int move)
 
 cdef class LegalMoveList:
 	cdef __LegalMoveList __ml
@@ -208,6 +270,72 @@ cdef class LegalMoveList:
 def move_to_str(int move):
 	return __move_to_str(move).decode('ascii')
 
+def move_to_STR(int move):
+	return __move_to_STR(move).decode('ascii')
+
 def move_from_str(str str):
 	cdef string str_b = str.encode('ascii')
 	return __move_from_str(str_b)
+
+def move_rotate90(int move):
+	return __move_rotate90(move)
+
+def move_rotate180(int move):
+	return __move_rotate180(move)
+
+def move_rotate270(int move):
+	return __move_rotate270(move)
+
+cdef extern from "ggf_parser.h":
+	cdef cppclass __GgfParser:
+		__GgfParser() except +
+		vector[vector[string]] names;
+		vector[vector[float]] ratings;
+		vector[int] results;
+		vector[int] result_flags;
+		vector[vector[int]] moves;
+		vector[vector[float]] evaluations;
+		void parse_file(const string& path) except +
+		void parse_str(const string& str)
+		int game_num()
+
+cdef class GgfParser:
+	cdef __GgfParser __parser
+
+	def __cinit__(self):
+		self.__parser = __GgfParser()
+
+	def parse_file(self, str path):
+		cdef string path_b = path.encode(locale.getpreferredencoding())
+		self.__parser.parse_file(path_b)
+
+	def parse_str(self, str str):
+		cdef string str_b = str.encode('ascii')
+		self.__parser.parse_str(str_b)
+
+	@property
+	def names(self):
+		return [[name.decode('ascii') for name in names] for names in self.__parser.names]
+
+	@property
+	def ratings(self):
+		return self.__parser.ratings
+
+	@property
+	def results(self):
+		return self.__parser.results
+
+	@property
+	def result_flags(self):
+		return self.__parser.result_flags
+
+	@property
+	def moves(self):
+		return self.__parser.moves
+
+	@property
+	def evaluations(self):
+		return self.__parser.evaluations
+
+	def game_num(self):
+		return self.__parser.game_num()
