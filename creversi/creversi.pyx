@@ -11,13 +11,15 @@ dtypeBitboard = np.dtype((np.uint8, 16))
 dtypeTurn = np.dtype(np.bool)
 dtypeMove = np.dtype(np.int8)
 dtypeReward = np.dtype(np.int8)
+dtypeDone = np.dtype(np.bool)
 
 TrainingData = np.dtype([
-    ('bitboard', dtypeBitboard),
+	('bitboard', dtypeBitboard),
 	('turn', dtypeTurn),
-    ('move', dtypeMove),
-    ('reward', dtypeReward),
-    ])
+	('move', dtypeMove),
+	('reward', dtypeReward),
+	('done', dtypeDone),
+	])
 
 
 SQUARES = [
@@ -34,7 +36,7 @@ SQUARES = [
 [BLACK_TURN, WHITE_TURN] = [True, False]
 PIECES = [EMPTY, BLACK, WHITE] = range(3)
 
-PASS = -1
+PASS = 64
 RESULT_FLAGS = [NONE, RESIGNED, TIME_OUT, MUTUAL_SCORE] = range(4)
 
 SVG_PIECE_DEFS = [
@@ -202,7 +204,7 @@ cdef class Board:
 		svg.append(ET.fromstring(SVG_BOARD))
 
 		cdef int i, j
-		if lastmove is not None:
+		if lastmove is not None and lastmove != PASS:
 			i, j = divmod(lastmove, 8)
 			ET.SubElement(svg, "rect", {
 				"x": str(10.5 + j * 20),

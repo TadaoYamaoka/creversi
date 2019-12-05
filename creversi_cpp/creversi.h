@@ -13,14 +13,17 @@ enum Piece {
 };
 
 int __move_rotate90(const int move) {
+	if (move == PASS) return move;
 	const int i = move / 8;
 	const int j = move % 8;
 	return j * 8 + (7 - i);
 }
 int __move_rotate180(const int move) {
+	if (move == PASS) return move;
 	return 63 - move;
 }
 int __move_rotate270(const int move) {
+	if (move == PASS) return move;
 	const int i = move / 8;
 	const int j = move % 8;
 	return (7 - j) * 8 + i;
@@ -66,7 +69,7 @@ public:
 	}
 
 	void move(const int move) {
-		if (move == -1)
+		if (move == PASS)
 			bd = board::reverse_board(bd);
 		else
 			bd = state::move(bd, move);
@@ -86,7 +89,10 @@ public:
 	}
 
 	bool is_legal(const int move) {
-		return half_board(state::mobility_pos(bd)).get(move);
+		const uint64_t mobility_pos = state::mobility_pos(bd);
+		if (move == PASS && mobility_pos == 0)
+			return true;
+		return half_board(mobility_pos).get(move);
 	}
 
 	bool is_game_over() const {
@@ -202,18 +208,38 @@ class __LegalMoveList
 {
 public:
 	__LegalMoveList() {}
-	__LegalMoveList(const __Board& board) : bits(state::mobility_pos(board)) {}
-
-	bool end() const { return !bits; }
-	int next() {
-		int sq = bit_manipulations::bit_to_pos(_blsi_u64(bits));
-		bits = _blsr_u64(bits);
-		return sq;
+	__LegalMoveList(const __Board& board) : bits(state::mobility_pos(board)), pass(false) {
+		if (!bits)
+			pass = true;
 	}
-	int size() const { return (int)_popcnt64(bits); }
+
+	bool end() const {
+		if (!pass)
+			return !bits;
+		else
+			return false;
+	}
+	int next() {
+		if (!pass) {
+			int sq = bit_manipulations::bit_to_pos(_blsi_u64(bits));
+			bits = _blsr_u64(bits);
+			return sq;
+		}
+		else {
+			pass = false;
+			return PASS;
+		}
+	}
+	int size() const {
+		if (!pass)
+			return (int)_popcnt64(bits);
+		else
+			return 1;
+	}
 
 private:
 	uint64_t bits;
+	bool pass;
 };
 
 std::string __move_to_str(const int move) { return to_s(move); }
