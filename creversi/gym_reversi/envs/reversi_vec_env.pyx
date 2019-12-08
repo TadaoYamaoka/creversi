@@ -23,7 +23,7 @@ class ReversiVecEnv:
 		dones = []
 
 		for i, move in enumerate(moves):
-			reward, done, is_draw = self.envs[i].step(move)
+			_, reward, done, _ = self.envs[i].step(move)
 			rewards.append(reward)
 			dones.append(done)
 			if done:
