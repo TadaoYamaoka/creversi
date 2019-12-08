@@ -16,7 +16,7 @@ class ReversiEnv(gym.Env):
 
 		# actionはmoveを直接受け付ける
 		# sample()は非合法手も含む
-		self.action_space = gym.spaces.Discrete(64)
+		self.action_space = gym.spaces.Discrete(65)
 
 	def reset(self, line=None):
 		if line:
