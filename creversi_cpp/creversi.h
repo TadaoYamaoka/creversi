@@ -5,6 +5,7 @@
 #include "hand.hpp"
 #include "utils.hpp"
 #include "value.hpp"
+#include <cstring>
 
 enum Piece {
 	Empty = 0,
