@@ -12,15 +12,15 @@ hand hand_from_diff(const board &old_b, const board &new_b) {
 
 hand to_hand(const std::string &hand_str) {
 	if (hand_str == "ps" || hand_str == "pass" || hand_str == "pa" || hand_str == "PS" || hand_str == "PASS" || hand_str == "PA") return PASS;
-	if (hand_str.size() != 2) throw std::runtime_error("invalid hand_str");
+	if (hand_str.size() != 2) throw std::range_error("invalid hand_str");
 	int j;
 	if ('a' <= hand_str[0] && hand_str[0] <= 'h')
 		j = hand_str[0] - 'a';
 	else if ('A' <= hand_str[0] && hand_str[0] <= 'H')
 		j = hand_str[0] - 'A';
 	else
-		throw std::runtime_error("invalid hand_str");
-	if (hand_str[1] < '1' || '8' < hand_str[1]) throw std::runtime_error("invalid hand_str");
+		throw std::range_error("invalid hand_str");
+	if (hand_str[1] < '1' || '8' < hand_str[1]) throw std::range_error("invalid hand_str");
 	int i = hand_str[1] - '1';
 	return i * 8 + j;
 }

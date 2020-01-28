@@ -247,7 +247,7 @@ cdef extern from "creversi.h":
 
 	string __move_to_str(const int move)
 	string __move_to_STR(const int move)
-	int __move_from_str(const string& str)
+	int __move_from_str(const string& str) except +
 	int __move_rotate90(const int move)
 	int __move_rotate180(const int move)
 	int __move_rotate270(const int move)
