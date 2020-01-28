@@ -19,7 +19,7 @@ hand to_hand(const std::string &hand_str) {
 	else if ('A' <= hand_str[0] && hand_str[0] <= 'H')
 		j = hand_str[0] - 'A';
 	else
-		throw "invalid hand_str";
+		throw std::runtime_error("invalid hand_str");
 	if (hand_str[1] < '1' || '8' < hand_str[1]) throw std::runtime_error("invalid hand_str");
 	int i = hand_str[1] - '1';
 	return i * 8 + j;
