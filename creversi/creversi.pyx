@@ -192,8 +192,8 @@ cdef class Board:
 			"xmlns": "http://www.w3.org/2000/svg",
 			"version": "1.1",
 			"xmlns:xlink": "http://www.w3.org/1999/xlink",
-			"width": str(258 * scale),
-			"height": str(258 * scale),
+			"width": str(215 * scale),
+			"height": str(215 * scale),
 			"viewBox": "0 0 172 172",
 		})
 
