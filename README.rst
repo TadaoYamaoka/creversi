@@ -40,11 +40,14 @@ creversiは、盤面管理、合法手生成、および機械学習向けのサ
 
   .. image:: https://raw.githubusercontent.com/wiki/TadaoYamaoka/creversi/images/board.svg?sanitize=true
 
-* 打つ
+  直前の手をハイライトして表示する場合
 
   .. code:: python
 
-      >>> move = board.move_to_str('d3') # 打つ
+      >>> move = creversi.move_from_str('c3')
+      >>> board.to_svg(move)
+
+  .. image:: https://raw.githubusercontent.com/wiki/TadaoYamaoka/creversi/images/board2.svg?sanitize=true
 
 * テキスト形式で盤面を表示
 
@@ -66,13 +69,6 @@ creversiは、盤面管理、合法手生成、および機械学習向けのサ
         7|........
         8|........
 
-* 終局判定
-
-  .. code:: python
-
-      >>> board.is_game_over()
-      False
-
 * 打ち手の表現
 
   打ち手は数値で扱う。ヘルパー関数で文字列形式に変換できる。
@@ -92,6 +88,21 @@ creversiは、盤面管理、合法手生成、および機械学習向けのサ
       >>> creversi.move_from_str('b2')
       9
 
+* 打つ
+
+  数値の打ち手を使う場合
+
+  .. code:: python
+
+      >>> move = creversi.move_from_str('d3')
+      >>> board.move(move)
+
+  文字列を直接の打ち手に使う場合
+
+  .. code:: python
+
+      >>> board.move_from_str('d3')
+
 * 合法手生成
 
   合法手生成は、Pythonのイテレータで取得する。
@@ -100,6 +111,15 @@ creversiは、盤面管理、合法手生成、および機械学習向けのサ
 
       >>> for move in board.legal_moves
       ...     print(creversi.move_to_str(move))
+
+* 合法手チェック
+
+  手が合法かどうかチェックする。
+
+  .. code:: python
+
+      >>> board.is_legal(move)
+      False
 
 * 手番の表現
 
@@ -110,6 +130,13 @@ creversiは、盤面管理、合法手生成、および機械学習向けのサ
       >>> board.turn
       True
       >>> board.turn == creversi.WHITE_TURN
+      False
+
+* 終局判定
+
+  .. code:: python
+
+      >>> board.is_game_over()
       False
 
 * 局面の文字列形式
