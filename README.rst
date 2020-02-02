@@ -71,7 +71,7 @@ creversiは、盤面管理、合法手生成、および機械学習向けのサ
 
 * 打ち手の表現
 
-  打ち手は数値で扱う。ヘルパー関数で文字列形式に変換できる。
+  打ち手は0から64の数値で扱う。座標a1が0、b1が1、…、h8が63になり、パスが64になる。ヘルパー関数で文字列形式に変換できる。
 
   .. code:: python
 
@@ -81,7 +81,7 @@ creversiは、盤面管理、合法手生成、および機械学習向けのサ
       >>> creversi.move_to_str(move)
       'b2'
 
-  文字列形式から数値の打ち手に変換できる。
+  文字列形式から数値の打ち手に変換できる。パスを表す文字列は、'pass'となる。
 
   .. code:: python
 
@@ -151,6 +151,49 @@ creversiは、盤面管理、合法手生成、および機械学習向けのサ
 
       >>> board.set_line('------------------OOO------OXX----OOXX----OX--------------------', creversi.BLACK_TURN)
 
+  コンストラクタでも初期化可能
+
+  .. code:: python
+
+      >>> board = creversi.Board('------------------OOO------OXX----OOXX----OX--------------------', creversi.BLACK_TURN)
+
+* 石の数の取得
+
+  石の合計
+
+  .. code:: python
+
+      >>> board.piece_sum()
+
+  手番側の石の数
+
+  .. code:: python
+
+      >>> board.piece_num()
+
+  相手番側の石の数
+
+  .. code:: python
+
+      >>> board.opponent_piece_num()
+
+  手番側から見た石の差
+
+  .. code:: python
+
+      >>> board.diff_num()
+
+  置ける石の数
+
+  .. code:: python
+
+      >>> board.puttable_num()
+
+  相手の置ける石の数
+
+  .. code:: python
+
+      >>> board.opponent_puttable_num()
 
 * 局面のビットボード形式
 
@@ -164,6 +207,26 @@ creversiは、盤面管理、合法手生成、および機械学習向けのサ
       >>> board.to_bitboard(bitboard)
 
       >>> board.set_bitboard(bitboard, creversi.BLACK_TURN)
+
+* 局面の2次元ベクトル表現
+
+  石のある位置を1、それ以外を0とした2次元ベクトルを、手番側の石と相手番の石の2チャンネルで表現したものをNCHW形式のndarrayで取得できる。
+  畳み込み層への入力とすることができる。
+
+  .. code:: python
+
+      >>> import numpy as np
+
+      >>> planes = np.empty(1, np.empty((1, 2, 8, 8), dtype=np.float32))
+      >>> board.piece_planes(planes[0])
+
+  2次元ベクトルを90°、180°、270°回転したものも取得できる。
+
+  .. code:: python
+
+      >>> board.piece_planes_rotate90(planes[0])
+      >>> board.piece_planes_rotate180(planes[0])
+      >>> board.piece_planes_rotate270(planes[0])
 
 * 機械学習向け訓練データ形式
 
@@ -205,7 +268,7 @@ creversiは、盤面管理、合法手生成、および機械学習向けのサ
       >>> BATCH_SIZE = 8
       >>> vecenv = ReversiVecEnv(BATCH_SIZE)
 
-      >>> states = get_states(vecenv.envs)
+      >>> board0 = vecenv.envs[0].board
       >>> rewards, dones = vecenv.step(moves)
 
 インストール
