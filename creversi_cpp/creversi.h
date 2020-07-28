@@ -54,8 +54,8 @@ public:
 	}
 
 	void to_bitboard(char* bitboard) const {
-		const uint64_t& player = bd.player();
-		const uint64_t& opponent = bd.opponent();
+		const uint64_t player = bd.player();
+		const uint64_t opponent = bd.opponent();
 		std::memcpy(bitboard, (const char*)&player, 8);
 		std::memcpy(bitboard + 8, (const char*)&opponent, 8);
 	}
