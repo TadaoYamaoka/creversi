@@ -109,7 +109,7 @@ creversiは、盤面管理、合法手生成、および機械学習向けのサ
 
   .. code:: python
 
-      >>> for move in board.legal_moves
+      >>> for move in board.legal_moves:
       ...     print(creversi.move_to_str(move))
 
 * 合法手チェック
