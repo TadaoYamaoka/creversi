@@ -43,8 +43,13 @@ unsigned char _bittestandreset64(long long *a, long long b)
 #define _mm256_set_m128i(v0, v1)  _mm256_insertf128_si256(_mm256_castsi128_si256(v1), (v0), 1)
 #define _mm256_setr_m128i(v0, v1) _mm256_set_m128i((v1), (v0))
 
+#ifdef __APPLE__
+#include <machine/endian.h>
+#define _byteswap_uint64(x) _bswap64(x)
+#else
 #include <byteswap.h>
 #define _byteswap_uint64(x) bswap_64(x)
+#endif
 
 #define _rotr64 __rorq
 #endif
