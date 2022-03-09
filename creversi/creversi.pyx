@@ -92,11 +92,13 @@ cdef extern from "creversi.h":
 cdef class Board:
 	cdef __Board __board
 
-	def __cinit__(self, str line=None, bool is_black_turn=True):
+	def __cinit__(self, str line=None, bool is_black_turn=True, Board board=None):
 		cdef string line_b
 		if line:
 			line_b = line.encode('ascii')
 			self.__board = __Board(line_b, is_black_turn)
+		elif board:
+			self.__board = board.__board
 		else:
 			self.__board = __Board()
 
