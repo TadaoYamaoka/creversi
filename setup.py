@@ -29,7 +29,7 @@ ext_modules = [
 
 setup(
     name='creversi',
-    version='0.0.0',
+    version='0.0.1',
     packages=['creversi', 'creversi.gym_reversi', 'creversi.gym_reversi.envs'],
     ext_modules=ext_modules,
     cmdclass={'build_ext': my_build_ext}
