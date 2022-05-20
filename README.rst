@@ -1,5 +1,8 @@
 creversi: 高速なPythonのリバーシライブラリ
 ==========================================
+.. image:: https://img.shields.io/pypi/v/creversi.svg
+    :target: https://pypi.python.org/pypi/creversi
+    :alt: PyPI package
 
 概要
 ----
@@ -279,6 +282,21 @@ creversiは、盤面管理、合法手生成、および機械学習向けのサ
 ::
 
     pip install git+https://github.com/TadaoYamaoka/creversi
+
+* PYPIからインストール
+
+::
+
+    pip install creversi
+
+pipのバージョン19.0以上が必要です。19.0未満の場合は、事前にpipの
+`アップグレード <https://pip.pypa.io/en/stable/installing/#upgrading-pip>`_
+が必要です。
+
+インストールに失敗して、再実行する際は、--no-cache-dirオプションを付けて実行してください。
+::
+
+    pip install --no-cache-dir creversi
 
 謝辞
 ----
